@@ -1,0 +1,73 @@
+1- create a new project in firebase console
+2- install firebase through npm and initialize firebase (firebase.js)
+3. Now In authentication section , enable email/password login authentication for user login
+4. Now follow firebase auth documentation to login,register,logout user.
+-    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   
+
+5. Add/Create a new document or add data into firebase collection:-
+    - start in production mode
+    - In firebase.js
+    import {getFirestore} from "firebase/firestore";
+    export const db = getFirestore();
+
+    -Than in any file where you want to add data:-
+    import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore"; 
+    import { db } from "../../firebase";
+
+      const handleAdd = async(e)=>{
+        e.preventDefault();
+        const res = await addDoc(collection(db,"cities"),{
+        name:"Jaipur",
+        state:"Rajasthan",
+        country:"India",
+        timeStamp: serverTimestamp()
+        })
+        console.log(res.id);
+    }
+-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -  
+
+6. Image Upload (https://firebase.google.com/docs/storage/web/start) (Full Example)
+    - do storage rules settings to true
+    import { getStorage } from "firebase/storage";
+    const storage = getStorage(app);
+
+    -Now in any file
+    import { getStorage, ref, uploadString } from "firebase/storage";
+
+      // for uploading image to firebase storage
+      useEffect(()=>{
+        const uploadFile = ()=>{
+          const name = new Date().getTime() + file.name;
+          const storageRef = ref(storage, name);
+          const uploadTask = uploadBytesResumable(storageRef, file);
+          uploadTask.on('state_changed', 
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log('Upload is ' + progress + '% done');
+              setPerc(progress);
+              switch (snapshot.state) {
+                case 'paused':
+                  console.log('Upload is paused');
+                  break;
+                case 'running':
+                  console.log('Upload is running');
+                  break;
+                default:
+                  break;
+              }
+            }, 
+            (error) => {
+              console.log(error);
+            }, 
+            () => {
+              getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                console.log('File available at', downloadURL);
+                setData((prev)=>({...prev,img:downloadURL}))
+                console.log(data);
+              });
+            }
+          );
+        }
+        file && uploadFile();
+      },[file])
+
